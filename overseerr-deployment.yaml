@@ -1,0 +1,42 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: overseerr
+  labels:
+    app: overseerr
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: overseerr
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: overseerr
+    spec:
+      containers:
+      - name: overseerr
+        imagePullPolicy: "Always"
+        image: lscr.io/linuxserver/overseerr:latest
+        ports:
+        - name: http
+          containerPort: 5055 
+          protocol: TCP
+        env:
+        - name: TZ
+          value: "America/Denver"
+        - name: PUID
+          value: "1000"
+        - name: GUID
+          value: "1000"
+        volumeMounts:
+        - name: k8s-pv02
+          mountPath: /config
+          subPath: overseerr/config
+      volumes:
+      - name: k8s-pv02
+        persistentVolumeClaim:
+          claimName: synology-k8s-pv02
