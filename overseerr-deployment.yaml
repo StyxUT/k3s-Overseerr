@@ -17,6 +17,15 @@ spec:
       labels:
         app: overseerr
     spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: tpu
+                operator: NotIn
+                values:
+                - "true"
       containers:
       - name: overseerr
         imagePullPolicy: "Always"
