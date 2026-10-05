@@ -1,51 +1,67 @@
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: overseerr
+  name: seer
   labels:
-    app: overseerr
+    app: seer
 spec:
   replicas: 1
-  selector:
-    matchLabels:
-      app: overseerr
   strategy:
     type: Recreate
+  selector:
+    matchLabels:
+      app: seer
   template:
     metadata:
       labels:
-        app: overseerr
+        app: seer
     spec:
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-            - matchExpressions:
-              - key: tpu
-                operator: NotIn
-                values:
-                - "true"
+      nodeSelector:
+        kubernetes.io/hostname: k3s-worker-02
+      imagePullSecrets:
+        - name: image-registry-credentials
+      terminationGracePeriodSeconds: 30
       containers:
-      - name: overseerr
-        imagePullPolicy: "Always"
-        image: lscr.io/linuxserver/overseerr:latest
-        ports:
-        - name: http
-          containerPort: 5055 
-          protocol: TCP
-        env:
-        - name: TZ
-          value: "America/Denver"
-        - name: PUID
-          value: "1000"
-        - name: GUID
-          value: "1000"
-        volumeMounts:
-        - name: k8s-pv02
-          mountPath: /config
-          subPath: overseerr/config
+        - name: seer
+          image: 192.168.50.222:32050/seerr-team/seerr@sha256:27602401178d54f1964442287b9f23f67a3fa2252645ee8065839ea1c3f69e45
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 5055
+              protocol: TCP
+          env:
+            - name: TZ
+              value: America/Denver
+          resources:
+            requests:
+              cpu: 100m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+          startupProbe:
+            httpGet:
+              path: /api/v1/status
+              port: http
+            periodSeconds: 10
+            failureThreshold: 30
+          readinessProbe:
+            httpGet:
+              path: /api/v1/status
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 3
+          livenessProbe:
+            httpGet:
+              path: /api/v1/status
+              port: http
+            periodSeconds: 20
+            timeoutSeconds: 3
+          volumeMounts:
+            - name: config
+              mountPath: /app/config
+              subPath: seer/config
       volumes:
-      - name: k8s-pv02
-        persistentVolumeClaim:
-          claimName: synology-k8s-pv02
+        - name: config
+          persistentVolumeClaim:
+            claimName: synology-k8s-pv02
