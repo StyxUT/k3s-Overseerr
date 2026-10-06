@@ -60,7 +60,7 @@ spec:
           volumeMounts:
             - name: config
               mountPath: /app/config
-              subPath: seer/config
+              subPath: seerr/config
       volumes:
         - name: config
           persistentVolumeClaim:

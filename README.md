@@ -1,31 +1,27 @@
-# Seerr (Overseerr)
+# Seerr
 
-Single-replica Seerr deployment in the `default` namespace, pinned to
-`k3s-worker-02` for the requested outbound internet access. Application data
-is stored at `/app/config` on `synology-k8s-pv02` under `seer/config`; back up
-the Synology data along with the application configuration.
+Seerr runs as a single replica in the `default` namespace on
+`k3s-worker-02`, where the approved internet egress is available. The image is
+pinned by immutable digest and pulled from the private registry.
 
-The image is promoted from `ghcr.io/seerr-team/seerr` and pinned by immutable
-digest. The pod pulls from the private registry using the namespace secret
-`image-registry-credentials`. Do not add internet access elsewhere as an image
-pull workaround; promotion is handled separately.
+## Persistence
+
+`/app/config` uses the existing `default/synology-k8s-pv02` ReadWriteMany claim
+under `seerr/config` on the Synology `/volume2/k8s-pv02` export. Back up the
+Seerr configuration along with the NAS data.
 
 ## Access
 
 - Direct HTTP: `http://k3s-worker-02.home:30555`
-- Kubernetes Service: `seer.default.svc:5055`
+- Kubernetes Service: `default/seer`, NodePort `30555`, target port `5055`
 
-The NodePort is the backend/fallback. Route an HTTPS hostname through HAProxy
-if desired; no hostname was specified for this deployment.
+The Service resource retains its historical `seer` name to avoid breaking
+existing callers; its selector targets the current `app=seerr` Deployment.
 
-## Operations
+## Deployment
 
 ```sh
 kubectl apply -k .
-kubectl rollout status deployment/seer --timeout=180s
-kubectl get pods,svc,endpoints -l app=seer -o wide
+kubectl rollout status deployment/seerr --timeout=180s
+kubectl get pods,svc,endpoints -l app=seerr -o wide
 ```
-
-This application is explicitly scheduled only on worker-02, which has scoped
-TCP/80,443 egress. Its native metrics endpoint was not verified, so no
-ServiceMonitor is configured.
