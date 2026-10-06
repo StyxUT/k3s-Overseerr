@@ -1,20 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: seer
+  name: seerr
   labels:
-    app: seer
+    app: seerr
 spec:
   replicas: 1
   strategy:
     type: Recreate
   selector:
     matchLabels:
-      app: seer
+      app: seerr
   template:
     metadata:
       labels:
-        app: seer
+        app: seerr
     spec:
       nodeSelector:
         kubernetes.io/hostname: k3s-worker-02
@@ -22,7 +22,7 @@ spec:
         - name: image-registry-credentials
       terminationGracePeriodSeconds: 30
       containers:
-        - name: seer
+        - name: seerr
           image: 192.168.50.222:32050/seerr-team/seerr@sha256:27602401178d54f1964442287b9f23f67a3fa2252645ee8065839ea1c3f69e45
           imagePullPolicy: IfNotPresent
           ports:
