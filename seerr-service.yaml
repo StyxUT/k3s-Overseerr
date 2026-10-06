@@ -1,9 +1,9 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: seer
+  name: seerr
   labels:
-    app: seer
+    app: seerr
 spec:
   type: NodePort
   selector:

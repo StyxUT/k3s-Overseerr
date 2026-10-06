@@ -13,10 +13,9 @@ Seerr configuration along with the NAS data.
 ## Access
 
 - Direct HTTP: `http://k3s-worker-02.home:30555`
-- Kubernetes Service: `default/seer`, NodePort `30555`, target port `5055`
+- Kubernetes Service: `default/seerr`, NodePort `30555`, target port `5055`
 
-The Service resource retains its historical `seer` name to avoid breaking
-existing callers; its selector targets the current `app=seerr` Deployment.
+The Service selects the `app=seerr` Deployment.
 
 ## Deployment
 
@@ -24,5 +23,5 @@ existing callers; its selector targets the current `app=seerr` Deployment.
 kubectl apply -k .
 kubectl rollout status deployment/seerr --timeout=180s
 kubectl get pods -l app=seerr -o wide
-kubectl get service/endpoints seer -o wide
+kubectl get service/endpoints seerr -o wide
 ```
