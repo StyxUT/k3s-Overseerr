@@ -23,5 +23,6 @@ existing callers; its selector targets the current `app=seerr` Deployment.
 ```sh
 kubectl apply -k .
 kubectl rollout status deployment/seerr --timeout=180s
-kubectl get pods,svc,endpoints -l app=seerr -o wide
+kubectl get pods -l app=seerr -o wide
+kubectl get service/endpoints seer -o wide
 ```
